@@ -20,13 +20,29 @@ def register(nom, port, matricules):
     
     if sent == len (data): 
      print (" Envoi complet ") 
-    taille_reponse_b = s.recv(4)
-    taille_reponse = struct.unpack('I', taille_reponse_b)[0]
+    
+    while True:
+     taille_reponse_b = s.recv(4)
+     if not taille_reponse_b:
+            print("connexion out")
+            break
+     
+     taille_reponse = struct.unpack('I', taille_reponse_b)[0] 
     
     
-    msg = s.recv(taille_reponse).decode('utf-8')
-    print("Reçu")
-    print(msg)
+     msg_binaire = s.recv(taille_reponse)
+     msg = json.loads(msg_binaire.decode('utf-8'))
+    
+    
+     if msg.get("request") == "ping":
+            print("Ping reçu !") 
+    
+     pong_data = json.dumps({"response": "pong"}).encode('utf-8')
+            
+           
+     s.send(struct.pack('I', len(pong_data)) + pong_data)
+    
+
 
 
 register("MonIA", 5000, ["24186"])     
